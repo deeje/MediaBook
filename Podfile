@@ -1,6 +1,6 @@
 
 target 'MediaBook' do
-  platform :ios, '15.0'
+  platform :ios, '16.0'
   use_frameworks!
   
   pod 'CloudCore'
