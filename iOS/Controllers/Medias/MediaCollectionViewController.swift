@@ -296,7 +296,8 @@ extension MediaCollectionViewController: UIDocumentPickerDelegate {
                     
                     let imageData = try Data(contentsOf: url)
                     try imageData.write(to: tempURL)
-                    Media.addImage(from: url, in: self.persistentContainer)
+                    
+                    Media.addImage(from: tempURL, in: self.persistentContainer)
                 } catch {
                     if let error = error as NSError? {
                         os_log("copy movie failed: %@, info: %@",
