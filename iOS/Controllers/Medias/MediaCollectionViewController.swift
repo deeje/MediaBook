@@ -73,6 +73,8 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
         configureProgressView()
         
         collectionView.delegate = self
+        collectionView.dragDelegate = self
+        collectionView.dropDelegate = self
     }
     
     func configureLayout() {
@@ -163,7 +165,10 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
             let fileAction = UIAction(title: "Files", image: UIImage(systemName: "folder")) { [weak self] action in
                 self?.importDocuments()
             }
-            let importMenu = UIMenu(title: "Menu", children: [photoAction, fileAction])
+            let pasteAction = UIAction(identifier: .paste) { [weak self] action in
+                self?.handlePaste()
+            }
+            let importMenu = UIMenu(title: "Menu", children: [photoAction, fileAction, pasteAction])
             let importButton = UIBarButtonItem(systemItem: .add, primaryAction: nil, menu: importMenu)
             
             let selectAction = UIAction(title: "Select", image: nil) { [weak self] action in
@@ -191,6 +196,65 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
 }
 
 
+// MARK: Paste
+
+extension MediaCollectionViewController {
+    
+    func importFrom(itemProvider provider: NSItemProvider) {
+        guard provider.canLoadObject(ofClass: UIImage.self) else { return }
+                            
+        provider.loadObject(ofClass: UIImage.self) { object, error in
+            guard error == nil, let image = object as? UIImage else {
+                if let error = error as NSError? {
+                    os_log("load movie failed: %@, info: %@",
+                           log: OSLog.model,
+                           type: .error,
+                           error.localizedDescription,
+                           error.userInfo)
+                }
+                
+                return
+            }
+            
+            do {
+                let fileName = UUID().uuidString
+                var tempURL = try FileManager.default.url(for: .cachesDirectory,
+                                                          in: .userDomainMask,
+                                                          appropriateFor: nil,
+                                                          create: true)
+                tempURL.appendPathComponent(fileName)
+                tempURL.appendPathExtension("png")
+                
+                let imageData = image.fixOrientation().pngData()
+                try imageData?.write(to: tempURL)
+                
+                Media.addImage(from: tempURL, in: self.persistentContainer)
+            } catch {
+                if let error = error as NSError? {
+                    os_log("copy movie failed: %@, info: %@",
+                           log: OSLog.model,
+                           type: .error,
+                           error.localizedDescription,
+                           error.userInfo)
+                }
+            }
+        }
+    }
+    
+    func handlePaste() {
+        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "import paste")
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            let pasteboard = UIPasteboard.general
+            for itemProvider in pasteboard.itemProviders {
+                self.importFrom(itemProvider: itemProvider)
+            }
+            
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+        }
+    }
+    
+}
 // MARK: Import from Photos
 
 extension MediaCollectionViewController: PHPickerViewControllerDelegate {
@@ -215,44 +279,7 @@ extension MediaCollectionViewController: PHPickerViewControllerDelegate {
                 for result in results {
                     let provider = result.itemProvider
                     
-                    guard provider.canLoadObject(ofClass: UIImage.self) else { continue }
-                    
-                    provider.loadObject(ofClass: UIImage.self) { object, error in
-                        guard error == nil, let image = object as? UIImage else {
-                            if let error = error as NSError? {
-                                os_log("load movie failed: %@, info: %@",
-                                       log: OSLog.model,
-                                       type: .error,
-                                       error.localizedDescription,
-                                       error.userInfo)
-                            }
-                            
-                            return
-                        }
-                        
-                        do {
-                            let fileName = UUID().uuidString
-                            var tempURL = try FileManager.default.url(for: .cachesDirectory,
-                                                                      in: .userDomainMask,
-                                                                      appropriateFor: nil,
-                                                                      create: true)
-                            tempURL.appendPathComponent(fileName)
-                            tempURL.appendPathExtension("png")
-                            
-                            let imageData = image.fixOrientation().pngData()
-                            try imageData?.write(to: tempURL)
-                            
-                            Media.addImage(from: tempURL, in: self.persistentContainer)
-                        } catch {
-                            if let error = error as NSError? {
-                                os_log("copy movie failed: %@, info: %@",
-                                       log: OSLog.model,
-                                       type: .error,
-                                       error.localizedDescription,
-                                       error.userInfo)
-                            }
-                        }
-                    }
+                    self.importFrom(itemProvider: provider)
                 }
                 
                 UIApplication.shared.endBackgroundTask(backgroundTask)
@@ -310,6 +337,46 @@ extension MediaCollectionViewController: UIDocumentPickerDelegate {
             }
             
             UIApplication.shared.endBackgroundTask(backgroundTask)
+        }
+    }
+    
+}
+
+
+// MARK: Drag
+
+extension MediaCollectionViewController: UICollectionViewDragDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        var dragItems: [UIDragItem] = []
+
+        if let mediaID = self.diffableDataSource.itemIdentifier(for: indexPath),
+           let mediaMO = try? viewContext.existingObject(with: mediaID) as? Media,
+           let imageMO = mediaMO.image,
+           imageMO.localAvailable == true
+        {
+            let itemProvider = NSItemProvider(contentsOf: imageMO.url, contentType: UTType.image)
+            itemProvider.suggestedName = mediaMO.exportTitle()
+            
+            let dragItem = UIDragItem(itemProvider: itemProvider)
+            dragItems.append(dragItem)
+        }
+        
+        return dragItems
+    }
+    
+}
+
+
+// MARK: Drop
+
+extension MediaCollectionViewController: UICollectionViewDropDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+        for dropItem in coordinator.items {
+            let provider = dropItem.dragItem.itemProvider
+            
+            self.importFrom(itemProvider: provider)
         }
     }
     
