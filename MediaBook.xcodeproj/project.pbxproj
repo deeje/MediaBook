@@ -16,7 +16,7 @@
 		570603E6281725DD00F52353 /* URL+AppGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 570603E5281725DD00F52353 /* URL+AppGroups.swift */; };
 		570603E8281725EE00F52353 /* OSLog+SketchBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 570603E7281725EE00F52353 /* OSLog+SketchBook.swift */; };
 		570603EB2817261C00F52353 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 570603EA2817261C00F52353 /* CloudKit.framework */; };
-		570603ED281736B800F52353 /* Sketch+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 570603EC281736B800F52353 /* Sketch+CoreDataClass.swift */; };
+		570603ED281736B800F52353 /* Media+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 570603EC281736B800F52353 /* Media+CoreDataClass.swift */; };
 		573FF90D283F04FC0012B2E5 /* UIImage+Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573FF90C283F04FC0012B2E5 /* UIImage+Scale.swift */; };
 		573FF90F284145290012B2E5 /* UIImage+FixOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573FF90E284145290012B2E5 /* UIImage+FixOrientation.swift */; };
 		573FF911284155C00012B2E5 /* Datafile+Viewable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573FF910284155C00012B2E5 /* Datafile+Viewable.swift */; };
@@ -69,7 +69,7 @@
 		570603E7281725EE00F52353 /* OSLog+SketchBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "OSLog+SketchBook.swift"; sourceTree = "<group>"; };
 		570603E92817261700F52353 /* MediaBook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MediaBook.entitlements; sourceTree = "<group>"; };
 		570603EA2817261C00F52353 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
-		570603EC281736B800F52353 /* Sketch+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sketch+CoreDataClass.swift"; sourceTree = "<group>"; };
+		570603EC281736B800F52353 /* Media+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Media+CoreDataClass.swift"; sourceTree = "<group>"; };
 		573FF90C283F04FC0012B2E5 /* UIImage+Scale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Scale.swift"; sourceTree = "<group>"; };
 		573FF90E284145290012B2E5 /* UIImage+FixOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+FixOrientation.swift"; sourceTree = "<group>"; };
 		573FF910284155C00012B2E5 /* Datafile+Viewable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datafile+Viewable.swift"; sourceTree = "<group>"; };
@@ -190,7 +190,7 @@
 				570603D82817222D00F52353 /* Datafile+CloudCoreCacheable.swift */,
 				570603D92817222D00F52353 /* Datafile+CoreDataClass.swift */,
 				573FF910284155C00012B2E5 /* Datafile+Viewable.swift */,
-				570603EC281736B800F52353 /* Sketch+CoreDataClass.swift */,
+				570603EC281736B800F52353 /* Media+CoreDataClass.swift */,
 				570603DA2817222D00F52353 /* CoreDataContextObserver.swift */,
 			);
 			path = Model;
@@ -461,7 +461,7 @@
 			files = (
 				570603E8281725EE00F52353 /* OSLog+SketchBook.swift in Sources */,
 				57FA751927C7042800E268FF /* LaunchCoordinator.swift in Sources */,
-				570603ED281736B800F52353 /* Sketch+CoreDataClass.swift in Sources */,
+				570603ED281736B800F52353 /* Media+CoreDataClass.swift in Sources */,
 				57FA751B27C7043300E268FF /* Coordinator.swift in Sources */,
 				570603E4281725BA00F52353 /* NSPersistentContainer+SketchBook.swift in Sources */,
 				570603DB2817222D00F52353 /* Datafile+CloudCoreCacheable.swift in Sources */,

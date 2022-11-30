@@ -66,4 +66,15 @@ public class Media: NSManagedObject {
         return datafile(of: .thumbnail)
     }
     
+    func exportTitle() -> String! {
+        var newTitle = title
+        if newTitle == nil {
+            newTitle = createdAt!.formatted(date: .numeric, time: .shortened)
+            newTitle = newTitle?.replacingOccurrences(of: "/", with: "-")
+            newTitle = newTitle?.replacingOccurrences(of: ":", with: "-")
+            newTitle?.append(".png")
+        }
+        return newTitle!
+    }
+    
 }
