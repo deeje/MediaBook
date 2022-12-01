@@ -196,17 +196,39 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
 }
 
 
+extension Array {
+
+    init(cfArray: CFArray) {
+        self = (0..<CFArrayGetCount(cfArray)).map {
+            unsafeBitCast(
+               CFArrayGetValueAtIndex(cfArray, $0),
+               to: Element.self
+            )
+        }
+    }
+    
+}
+
+
 // MARK: Paste
 
 extension MediaCollectionViewController {
     
     func importFrom(itemProvider provider: NSItemProvider) {
-        guard provider.canLoadObject(ofClass: UIImage.self) else { return }
-                            
-        provider.loadObject(ofClass: UIImage.self) { object, error in
-            guard error == nil, let image = object as? UIImage else {
+        guard provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) else { return }
+
+        let _ = provider.loadFileRepresentation(for: UTType.image) { url, inPlace, error in
+            guard let url,
+                  let data = NSData(contentsOf: url),
+                  let source = CGImageSourceCreateWithData(data, nil),
+                  let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil),
+                  let colorSpace = cgImage.colorSpace,
+                  let cgMeta = CGImageSourceCopyMetadataAtIndex(source, 0, nil),
+                  let cfTags = CGImageMetadataCopyTags(cgMeta),
+                  error == nil else
+            {
                 if let error = error as NSError? {
-                    os_log("load movie failed: %@, info: %@",
+                    os_log("load photo failed: %@, info: %@",
                            log: OSLog.model,
                            type: .error,
                            error.localizedDescription,
@@ -217,6 +239,44 @@ extension MediaCollectionViewController {
             }
             
             do {
+                var size = CGSize(width: cgImage.width, height: cgImage.height)
+                var orientation: UIImage.Orientation = .up
+                let tags = Array<CGImageMetadataTag>(cfArray: cfTags)
+                for tag in tags {
+                    let name = CGImageMetadataTagCopyName(tag)
+                                        
+                    if name! as String == "Orientation" {
+                        let value = CGImageMetadataTagCopyValue(tag)
+                        let orientationString = value as! String
+                        switch orientationString {
+                        case "1":               // up
+                            orientation = .up
+                        case "2":
+                            orientation = .upMirrored
+                        case "3":               // down
+                            orientation = .down
+                        case "4":
+                            orientation = .downMirrored
+                        case "5":
+                            orientation = .left
+                        case "6":                 // left
+                            orientation = .right
+                        case "7":
+                            orientation = .rightMirrored
+                        case "8":
+                            orientation = .leftMirrored
+                        default:
+                            break;
+                        }
+                        
+                        if ["5", "6", "7", "8"].contains(orientationString) {
+                            size = CGSize(width: cgImage.height, height: cgImage.width)
+                        }
+                    }
+                }
+                var rotatedImage = cgImage.rotated(for: orientation, with: size, in: colorSpace)
+                var image = UIImage(cgImage: rotatedImage)
+                
                 let fileName = UUID().uuidString
                 var tempURL = try FileManager.default.url(for: .cachesDirectory,
                                                           in: .userDomainMask,
@@ -231,7 +291,7 @@ extension MediaCollectionViewController {
                 Media.addImage(from: tempURL, in: self.persistentContainer)
             } catch {
                 if let error = error as NSError? {
-                    os_log("copy movie failed: %@, info: %@",
+                    os_log("copy photo failed: %@, info: %@",
                            log: OSLog.model,
                            type: .error,
                            error.localizedDescription,
