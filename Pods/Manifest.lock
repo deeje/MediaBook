@@ -4,17 +4,16 @@ PODS:
   - Viewer (4.4.0)
 
 DEPENDENCIES:
-  - CloudCore (from `../../Libraries/CloudCore`)
+  - CloudCore
   - Connectivity
   - Viewer (from `https://github.com/deeje/Viewer.git`, branch `feature/4.4`)
 
 SPEC REPOS:
   trunk:
+    - CloudCore
     - Connectivity
 
 EXTERNAL SOURCES:
-  CloudCore:
-    :path: "../../Libraries/CloudCore"
   Viewer:
     :branch: feature/4.4
     :git: https://github.com/deeje/Viewer.git
@@ -29,6 +28,6 @@ SPEC CHECKSUMS:
   Connectivity: e990703fb8d8db54649ea05facac92000cc0f3eb
   Viewer: d2e9bbe1e5b7fc1ab1409454889170d9d26547e4
 
-PODFILE CHECKSUM: 116bbf19c727a8dfe17dfbbfcba468e68fcc99bd
+PODFILE CHECKSUM: e7a5b1cf7bdc335c57bb99cac75d2be49f95eebc
 
 COCOAPODS: 1.11.3
