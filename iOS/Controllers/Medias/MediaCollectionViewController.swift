@@ -93,7 +93,7 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
     
     func configureDataSource() {
         diffableDataSource = UICollectionViewDiffableDataSource<String, NSManagedObjectID>(collectionView: collectionView) { [weak self] collectionView, indexPath, mediaID in
-            guard let self = self else { return nil }
+            guard let self else { return nil }
                         
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Self.cellReuseID, for: indexPath) as! MediaCell
             
@@ -132,7 +132,7 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
     func configureButtons() {
         if collectionView.allowsMultipleSelection {
             let doneAction = UIAction(title: "Done", image: nil) { [weak self] action in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 self.allowsMultipleSelection = false
             }

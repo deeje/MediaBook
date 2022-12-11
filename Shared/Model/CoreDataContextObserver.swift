@@ -54,7 +54,7 @@ public class CoreDataContextObserver {
     
     deinit {
         unobserveAllObjects()
-        if let notificationObserver = notificationObserver {
+        if let notificationObserver {
             NotificationCenter.default.removeObserver(notificationObserver)
         }
     }

@@ -71,7 +71,7 @@ extension UIImage {
             return self
         }
         
-        guard let cgImage = cgImage, let colorSpace = cgImage.colorSpace else {
+        guard let cgImage, let colorSpace = cgImage.colorSpace else {
             return self
         }
         
