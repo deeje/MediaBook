@@ -1,6 +1,6 @@
 
 target 'MediaBook' do
-  platform :ios, '16.0'
+  platform :ios, '17.4'
   use_frameworks!
   
   pod 'CloudCore', :path => '../../Libraries/CloudCore/'
@@ -11,11 +11,11 @@ end
 
 post_install do |installer|
     installer.pods_project.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.4'
     end
     installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|
-            config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+            config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.4'
         end
     end
 end
