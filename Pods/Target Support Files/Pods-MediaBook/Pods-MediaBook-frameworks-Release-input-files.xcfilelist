@@ -1,4 +1,3 @@
 ${PODS_ROOT}/Target Support Files/Pods-MediaBook/Pods-MediaBook-frameworks.sh
 ${BUILT_PRODUCTS_DIR}/CloudCore/CloudCore.framework
-${BUILT_PRODUCTS_DIR}/Connectivity/Connectivity.framework
 ${BUILT_PRODUCTS_DIR}/Viewer/Viewer.framework
