@@ -22,6 +22,7 @@
 		573FF911284155C00012B2E5 /* Datafile+Viewable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573FF910284155C00012B2E5 /* Datafile+Viewable.swift */; };
 		5797C33B2783A70000961A3E /* Storyboarded.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5797C33A2783A70000961A3E /* Storyboarded.swift */; };
 		57B2A42027BEF435008140D0 /* MediaBook.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 57B2A41E27BEF434008140D0 /* MediaBook.xcdatamodeld */; };
+		57D60E672C2B6ECA009FBBEE /* Connectivity in Frameworks */ = {isa = PBXBuildFile; productRef = 57D60E662C2B6ECA009FBBEE /* Connectivity */; };
 		57DB571B27D98A25003AF1B6 /* UIView+AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57DB571A27D98A25003AF1B6 /* UIView+AutoLayout.swift */; };
 		57F883A127601FEF008A2CBB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F883A027601FEF008A2CBB /* AppDelegate.swift */; };
 		57F883AA27601FF0008A2CBB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57F883A927601FF0008A2CBB /* Assets.xcassets */; };
@@ -99,6 +100,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57D60E672C2B6ECA009FBBEE /* Connectivity in Frameworks */,
 				570603EB2817261C00F52353 /* CloudKit.framework in Frameworks */,
 				27B9C6ADA281B9CC48DCB93D /* Pods_MediaBook.framework in Frameworks */,
 			);
@@ -293,6 +295,9 @@
 			dependencies = (
 			);
 			name = MediaBook;
+			packageProductDependencies = (
+				57D60E662C2B6ECA009FBBEE /* Connectivity */,
+			);
 			productName = ARMirrorKit;
 			productReference = 57F8839D27601FEF008A2CBB /* MediaBook.app */;
 			productType = "com.apple.product-type.application";
@@ -365,6 +370,9 @@
 				Base,
 			);
 			mainGroup = 57F8839427601FEF008A2CBB;
+			packageReferences = (
+				57D60E652C2B6ECA009FBBEE /* XCRemoteSwiftPackageReference "connectivity" */,
+			);
 			productRefGroup = 57F8839E27601FEF008A2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -640,7 +648,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MediaBook.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20240515.0;
+				CURRENT_PROJECT_VERSION = 20240625.0;
 				DEVELOPMENT_TEAM = 26Y8AQV29F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MediaBook-Info.plist";
@@ -674,7 +682,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MediaBook.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20240515.0;
+				CURRENT_PROJECT_VERSION = 20240625.0;
 				DEVELOPMENT_TEAM = 26Y8AQV29F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MediaBook-Info.plist";
@@ -836,6 +844,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		57D60E652C2B6ECA009FBBEE /* XCRemoteSwiftPackageReference "connectivity" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rwbutler/connectivity";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		57D60E662C2B6ECA009FBBEE /* Connectivity */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 57D60E652C2B6ECA009FBBEE /* XCRemoteSwiftPackageReference "connectivity" */;
+			productName = Connectivity;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		57B2A41E27BEF434008140D0 /* MediaBook.xcdatamodeld */ = {
