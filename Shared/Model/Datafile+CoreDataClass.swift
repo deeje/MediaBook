@@ -12,6 +12,7 @@ public class Datafile: NSManagedObject {
     enum Contents: String {
         case unknown
         case image
+        case video
         case thumbnail
     }
     
@@ -27,6 +28,8 @@ public class Datafile: NSManagedObject {
                 suffix = nil
             case .image:
                 suffix = ".png"
+            case .video:
+                suffix = ".mp4"
             case .thumbnail:
                 suffix = ".png"
             }

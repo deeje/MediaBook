@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788" systemVersion="24E263" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Datafile" representedClassName="Datafile" syncable="YES" codeGenerationType="category">
         <attribute name="assetData" optional="YES" attributeType="Binary">
             <userInfo>
@@ -50,6 +50,7 @@
     </entity>
     <entity name="Media" representedClassName="Media" syncable="YES" codeGenerationType="category">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="mediaTypeRaw" optional="YES" attributeType="String"/>
         <attribute name="modifiedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="ownerName" optional="YES" attributeType="String"/>
         <attribute name="privateRecordData" optional="YES" attributeType="Binary" preserveAfterDeletion="YES"/>
@@ -64,8 +65,4 @@
             <entry key="CloudCoreScopes" value="private"/>
         </userInfo>
     </entity>
-    <elements>
-        <element name="Datafile" positionX="-63" positionY="18" width="128" height="239"/>
-        <element name="Media" positionX="-63" positionY="-18" width="128" height="149"/>
-    </elements>
 </model>

@@ -12,29 +12,51 @@ import os.log
 @objc(Media)
 public class Media: NSManagedObject {
     
-    static func addImage(from url: URL, in persistentContainer: NSPersistentContainer) {
+    enum MediaType: String {
+        case unknown
+        case image
+        case video
+    }
+    
+    static func add(from url: URL, as contents: Datafile.Contents, in persistentContainer: NSPersistentContainer) {
         persistentContainer.performBackgroundPushTask { moc in
             do {
                 let mediaMO = Media(context: moc)
                 mediaMO.createdAt = Date()
+                mediaMO.mediaType = contents == .video ? .video : .image
                 
                 let imageMO = Datafile(context: moc)
                 imageMO.cacheState = .local
                 imageMO.remoteStatus = .pending
-                imageMO.contents = .image
+                imageMO.contents = contents == .video ? .video : .image
                 imageMO.media = mediaMO
-
                 try FileManager.default.moveItem(at: url, to: imageMO.url)
                 
-                let thumbnailMO = Datafile(context: moc)
-                thumbnailMO.cacheState = .local
-                thumbnailMO.remoteStatus = .pending
-                thumbnailMO.contents = .thumbnail
-                thumbnailMO.media = mediaMO
-
-                let thumbnailImage = UIImage.resizedImage(at: imageMO.url, for: CGSize(width: 320, height: 240))!
-                let thumbnailData = thumbnailImage.pngData()
-                try thumbnailData?.write(to: thumbnailMO.url)
+                var thumbnailData: Data?
+                if contents == .video {
+                    let asset = AVURLAsset(url: imageMO.url)
+                    let generator = AVAssetImageGenerator(asset: asset)
+                    generator.maximumSize = CGSize(width: 400, height: 0)
+                    generator.requestedTimeToleranceBefore = .zero
+                    generator.requestedTimeToleranceAfter = CMTime(seconds: 2, preferredTimescale: 600)
+                    if let cgImage = try? generator.copyCGImage(at: .zero, actualTime: nil)
+                    {
+                        let thumbnailImage = UIImage(cgImage: cgImage)
+                        thumbnailData = thumbnailImage.pngData()
+                    }
+                } else {
+                    let thumbnailImage = UIImage.resizedImage(at: imageMO.url, for: CGSize(width: 320, height: 240))!
+                    thumbnailData = thumbnailImage.pngData()
+                }
+                
+                if let thumbnailData {
+                    let thumbnailMO = Datafile(context: moc)
+                    thumbnailMO.cacheState = .local
+                    thumbnailMO.remoteStatus = .pending
+                    thumbnailMO.contents = .thumbnail
+                    thumbnailMO.media = mediaMO
+                    try thumbnailData.write(to: thumbnailMO.url)
+                }
                 
                 try moc.save()
             } catch {
@@ -58,8 +80,21 @@ public class Media: NSManagedObject {
         return file
     }
     
+    var mediaType: MediaType {
+        get {
+            return mediaTypeRaw == nil ? .unknown : MediaType(rawValue: mediaTypeRaw!)!
+        }
+        set {
+            mediaTypeRaw = newValue.rawValue
+        }
+    }
+
     var image: Datafile? {
         return datafile(of: .image)
+    }
+    
+    var video: Datafile? {
+        return datafile(of: .video)
     }
     
     var thumbnail: Datafile? {
@@ -72,7 +107,14 @@ public class Media: NSManagedObject {
             newTitle = createdAt!.formatted(date: .numeric, time: .shortened)
             newTitle = newTitle?.replacingOccurrences(of: "/", with: "-")
             newTitle = newTitle?.replacingOccurrences(of: ":", with: "-")
-            newTitle?.append(".png")
+            switch mediaType {
+            case .image:
+                newTitle?.append(".png")
+            case .video:
+                newTitle?.append(".mp4")
+            default:
+                break
+            }
         }
         return newTitle!
     }

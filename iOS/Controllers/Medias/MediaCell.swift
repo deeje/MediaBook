@@ -28,7 +28,7 @@ class MediaCell: UICollectionViewCell {
     }
     
     private func updateImageState() {
-        if let cacheable = media?.image {
+        if let cacheable = media?.video ?? media?.image {
             var statusImage: UIImage?
             var newTint: UIColor?
             
@@ -88,6 +88,9 @@ class MediaCell: UICollectionViewCell {
             if let image = media?.image {
                 observer?.unobserveObject(object: image)
             }
+            if let video = media?.video {
+                observer?.unobserveObject(object: video)
+            }
             if let thumbnail = media?.thumbnail {
                 observer?.unobserveObject(object: thumbnail)
             }
@@ -105,6 +108,12 @@ class MediaCell: UICollectionViewCell {
             
             if let imageMO = media?.image {
                 observer?.observeObject(object: imageMO) { [weak self] object, state in
+                    self?.updateImageState()
+                }
+            }
+            
+            if let videoMO = media?.video {
+                observer?.observeObject(object: videoMO) { [weak self] object, state in
                     self?.updateImageState()
                 }
             }

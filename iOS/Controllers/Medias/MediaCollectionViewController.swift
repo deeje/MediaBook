@@ -160,7 +160,7 @@ class MediaCollectionViewController: UICollectionViewController, Storyboarded {
             navigationItem.rightBarButtonItem = actionButton
         } else {
             let photoAction = UIAction(title: "Photos", image: UIImage(systemName: "photo.on.rectangle")) { [weak self] action in
-                self?.importImage()
+                self?.importPhotos()
             }
             let fileAction = UIAction(title: "Files", image: UIImage(systemName: "folder")) { [weak self] action in
                 self?.importDocuments()
@@ -215,89 +215,131 @@ extension Array {
 extension MediaCollectionViewController {
     
     func importFrom(itemProvider provider: NSItemProvider) {
-        guard provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) else { return }
-
-        let _ = provider.loadFileRepresentation(for: UTType.image) { url, inPlace, error in
-            guard let url,
-                  let data = NSData(contentsOf: url),
-                  let source = CGImageSourceCreateWithData(data, nil),
-                  let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil),
-                  let colorSpace = cgImage.colorSpace,
-                  let cgMeta = CGImageSourceCopyMetadataAtIndex(source, 0, nil),
-                  let cfTags = CGImageMetadataCopyTags(cgMeta),
-                  error == nil else
-            {
-                if let error = error as NSError? {
-                    os_log("load photo failed: %@, info: %@",
-                           log: OSLog.model,
-                           type: .error,
-                           error.localizedDescription,
-                           error.userInfo)
+        if provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+            let _ = provider.loadFileRepresentation(for: UTType.movie) { url, inPlace, error in
+                guard let url,
+                      let data = NSData(contentsOf: url),
+                      error == nil else
+                {
+                    if let error = error as NSError? {
+                        os_log("load video failed: %@, info: %@",
+                               log: OSLog.model,
+                               type: .error,
+                               error.localizedDescription,
+                               error.userInfo)
+                    }
+                    
+                    return
                 }
                 
-                return
-            }
-            
-            do {
-                var size = CGSize(width: cgImage.width, height: cgImage.height)
-                var orientation: UIImage.Orientation = .up
-                let tags = Array<CGImageMetadataTag>(cfArray: cfTags)
-                for tag in tags {
-                    let name = CGImageMetadataTagCopyName(tag)
-                                        
-                    if name! as String == "Orientation" {
-                        let value = CGImageMetadataTagCopyValue(tag)
-                        let orientationString = value as! String
-                        switch orientationString {
-                        case "1":               // up
-                            orientation = .up
-                        case "2":
-                            orientation = .upMirrored
-                        case "3":               // down
-                            orientation = .down
-                        case "4":
-                            orientation = .downMirrored
-                        case "5":
-                            orientation = .left
-                        case "6":                 // left
-                            orientation = .right
-                        case "7":
-                            orientation = .rightMirrored
-                        case "8":
-                            orientation = .leftMirrored
-                        default:
-                            break;
-                        }
-                        
-                        if ["5", "6", "7", "8"].contains(orientationString) {
-                            size = CGSize(width: cgImage.height, height: cgImage.width)
-                        }
+                do {
+                    let fileName = UUID().uuidString
+                    var tempURL = try FileManager.default.url(for: .cachesDirectory,
+                                                              in: .userDomainMask,
+                                                              appropriateFor: nil,
+                                                              create: true)
+                    tempURL.appendPathComponent(fileName)
+                    tempURL.appendPathExtension("mp4")
+                    
+                    try data.write(to: tempURL)
+                    
+                    Media.add(from: tempURL, as: .video, in: self.persistentContainer)
+                } catch {
+                    if let error = error as NSError? {
+                        os_log("copy photo failed: %@, info: %@",
+                               log: OSLog.model,
+                               type: .error,
+                               error.localizedDescription,
+                               error.userInfo)
                     }
                 }
-                var rotatedImage = cgImage.rotated(for: orientation, with: size, in: colorSpace)
-                var image = UIImage(cgImage: rotatedImage)
+            }
+
+        }
+        else if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+            let _ = provider.loadFileRepresentation(for: UTType.image) { url, inPlace, error in
+                guard let url,
+                      let data = NSData(contentsOf: url),
+                      let source = CGImageSourceCreateWithData(data, nil),
+                      let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil),
+                      let colorSpace = cgImage.colorSpace,
+                      let cgMeta = CGImageSourceCopyMetadataAtIndex(source, 0, nil),
+                      let cfTags = CGImageMetadataCopyTags(cgMeta),
+                      error == nil else
+                {
+                    if let error = error as NSError? {
+                        os_log("load photo failed: %@, info: %@",
+                               log: OSLog.model,
+                               type: .error,
+                               error.localizedDescription,
+                               error.userInfo)
+                    }
+                    
+                    return
+                }
                 
-                let fileName = UUID().uuidString
-                var tempURL = try FileManager.default.url(for: .cachesDirectory,
-                                                          in: .userDomainMask,
-                                                          appropriateFor: nil,
-                                                          create: true)
-                tempURL.appendPathComponent(fileName)
-                tempURL.appendPathExtension("png")
-                
-                let imageData = image.fixOrientation().pngData()
-                try imageData?.write(to: tempURL)
-                
-                Media.addImage(from: tempURL, in: self.persistentContainer)
-            } catch {
-                if let error = error as NSError? {
-                    os_log("copy photo failed: %@, info: %@",
-                           log: OSLog.model,
-                           type: .error,
-                           error.localizedDescription,
-                           error.userInfo)
+                do {
+                    var size = CGSize(width: cgImage.width, height: cgImage.height)
+                    var orientation: UIImage.Orientation = .up
+                    let tags = Array<CGImageMetadataTag>(cfArray: cfTags)
+                    for tag in tags {
+                        let name = CGImageMetadataTagCopyName(tag)
+                                            
+                        if name! as String == "Orientation" {
+                            let value = CGImageMetadataTagCopyValue(tag)
+                            let orientationString = value as! String
+                            switch orientationString {
+                            case "1":               // up
+                                orientation = .up
+                            case "2":
+                                orientation = .upMirrored
+                            case "3":               // down
+                                orientation = .down
+                            case "4":
+                                orientation = .downMirrored
+                            case "5":
+                                orientation = .left
+                            case "6":                 // left
+                                orientation = .right
+                            case "7":
+                                orientation = .rightMirrored
+                            case "8":
+                                orientation = .leftMirrored
+                            default:
+                                break;
+                            }
+                            
+                            if ["5", "6", "7", "8"].contains(orientationString) {
+                                size = CGSize(width: cgImage.height, height: cgImage.width)
+                            }
+                        }
+                    }
+                    var rotatedImage = cgImage.rotated(for: orientation, with: size, in: colorSpace)
+                    var image = UIImage(cgImage: rotatedImage)
+                    
+                    let fileName = UUID().uuidString
+                    var tempURL = try FileManager.default.url(for: .cachesDirectory,
+                                                              in: .userDomainMask,
+                                                              appropriateFor: nil,
+                                                              create: true)
+                    tempURL.appendPathComponent(fileName)
+                    tempURL.appendPathExtension("png")
+                    
+                    let imageData = image.fixOrientation().pngData()
+                    try imageData?.write(to: tempURL)
+                    
+                    Media.add(from: tempURL, as: .image, in: self.persistentContainer)
+                } catch {
+                    if let error = error as NSError? {
+                        os_log("copy photo failed: %@, info: %@",
+                               log: OSLog.model,
+                               type: .error,
+                               error.localizedDescription,
+                               error.userInfo)
+                    }
                 }
             }
+
         }
     }
     
@@ -319,10 +361,10 @@ extension MediaCollectionViewController {
 
 extension MediaCollectionViewController: PHPickerViewControllerDelegate {
     
-    func importImage() {
+    func importPhotos() {
         var config = PHPickerConfiguration()
         config.selectionLimit = 0
-        config.filter = .any(of: [.images])
+        config.filter = .any(of: [.images, .videos])
         config.preferredAssetRepresentationMode = .current
         
         let pickerViewController = PHPickerViewController(configuration: config)
@@ -356,7 +398,7 @@ extension MediaCollectionViewController: PHPickerViewControllerDelegate {
 extension MediaCollectionViewController: UIDocumentPickerDelegate {
     
     func importDocuments() {
-        let viewController = UIDocumentPickerViewController(forOpeningContentTypes: [.image], asCopy: true)
+        let viewController = UIDocumentPickerViewController(forOpeningContentTypes: [.image, .movie], asCopy: true)
         viewController.delegate = self
         
         present(viewController, animated: true) {
@@ -381,10 +423,18 @@ extension MediaCollectionViewController: UIDocumentPickerDelegate {
                     tempURL.appendPathComponent(tempFileName)
                     tempURL.appendPathExtension(suffix)
                     
-                    let imageData = try Data(contentsOf: url)
-                    try imageData.write(to: tempURL)
+                    var contents: Datafile.Contents = .image
+                    switch suffix {
+                    case "mov", "mp4", "mpeg", "mpg", "avi":
+                        contents = .video
+                    default:
+                        break
+                    }
                     
-                    Media.addImage(from: tempURL, in: self.persistentContainer)
+                    let data = try Data(contentsOf: url)
+                    try data.write(to: tempURL)
+                    
+                    Media.add(from: tempURL, as: contents, in: self.persistentContainer)
                 } catch {
                     if let error = error as NSError? {
                         os_log("copy movie failed: %@, info: %@",
@@ -482,14 +532,14 @@ extension MediaCollectionViewController {
         let mediaID = self.diffableDataSource.itemIdentifier(for: indexPath)!
         let media = try! viewContext.existingObject(with: mediaID) as! Media
         
-        if let image = media.image {
-            if let lastError = image.lastErrorMessage {
+        if let cachable = media.video ?? media.image {
+            if let lastError = cachable.lastErrorMessage {
                 showError(message: lastError, for: mediaID)
-            } else if image.localAvailable {
+            } else if cachable.localAvailable {
                 let viewerController = ViewerController(initialIndexPath: indexPath, collectionView: collectionView)
                 viewerController.dataSource = self
                 present(viewerController, animated: false, completion: nil)
-            } else if image.readyToDownload {
+            } else if cachable.readyToDownload {
                 download([mediaID])
             }
         }
@@ -553,7 +603,7 @@ extension MediaCollectionViewController {
         persistentContainer.performBackgroundTask { moc in
             for mediaID in mediaIDs {
                 if let media = try? moc.existingObject(with: mediaID) as? Media,
-                   let cacheable = media.image,
+                   let cacheable = media.video ?? media.image,
                    cacheable.readyToDownload == true
                 {
                     cacheable.cacheState = .download
@@ -584,9 +634,9 @@ extension MediaCollectionViewController {
             do {
                 for mediaID in mediaIDs {
                     if let media = try? moc.existingObject(with: mediaID) as? Media,
-                       let imageMO = media.image
+                       let cachable = media.video ?? media.image
                     {
-                        imageMO.cacheState = .unload
+                        cachable.cacheState = .unload
                     }
                 }
                 try moc.save()
@@ -638,11 +688,7 @@ extension MediaCollectionViewController: ViewerControllerDataSource {
         let mediaID = self.diffableDataSource.itemIdentifier(for: indexPath)!
         let media = try! viewContext.existingObject(with: mediaID) as! Media
         
-        var viewable = media.image
-        if viewable == nil {
-            viewable = media.thumbnail
-        }
-        return viewable!
+        return media
     }
     
 }
