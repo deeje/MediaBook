@@ -1,5 +1,5 @@
 {
-  "originHash" : "d2b3b621cbfd5c0fe0967899a94e0229a19ab1629327d37fe96536fc56a7e96a",
+  "originHash" : "21acff2b7340c60e79703ca726bfcb08af9c125c30e65947c11b41152414b66e",
   "pins" : [
     {
       "identity" : "connectivity",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "ac5a98af6564f6000f01e9c4cf0b89c7e8282513",
         "version" : "7.0.0"
+      }
+    },
+    {
+      "identity" : "mediaviewer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/noppefoxwolf/MediaViewer",
+      "state" : {
+        "revision" : "42c36f73dd06717f242c8ee2e6157a4f8cc540af",
+        "version" : "0.0.13"
       }
     }
   ],

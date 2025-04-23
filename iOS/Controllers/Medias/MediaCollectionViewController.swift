@@ -14,6 +14,7 @@ import PhotosUI
 import os.log
 
 import Viewer
+import MediaViewer
 
 // swiftlint:disable force_cast
 // swiftlint:disable identifier_name
@@ -314,8 +315,8 @@ extension MediaCollectionViewController {
                             }
                         }
                     }
-                    var rotatedImage = cgImage.rotated(for: orientation, with: size, in: colorSpace)
-                    var image = UIImage(cgImage: rotatedImage)
+                    let rotatedImage = cgImage.rotated(for: orientation, with: size, in: colorSpace)
+                    let image = UIImage(cgImage: rotatedImage)
                     
                     let fileName = UUID().uuidString
                     var tempURL = try FileManager.default.url(for: .cachesDirectory,
@@ -536,9 +537,19 @@ extension MediaCollectionViewController {
             if let lastError = cachable.lastErrorMessage {
                 showError(message: lastError, for: mediaID)
             } else if cachable.localAvailable {
-                let viewerController = ViewerController(initialIndexPath: indexPath, collectionView: collectionView)
-                viewerController.dataSource = self
-                present(viewerController, animated: false, completion: nil)
+                
+                if true {
+                    let viewerController = ViewerController(initialIndexPath: indexPath, collectionView: collectionView)
+                    viewerController.dataSource = self
+                    present(viewerController, animated: false, completion: nil)
+                } else {
+                    let previewController = PreviewController()
+                    previewController.delegate = self
+                    previewController.dataSource = self
+                    previewController.currentPreviewItemIndex = indexPath.item
+                    present(previewController, animated: true, completion: nil)
+                }
+                
             } else if cachable.readyToDownload {
                 download([mediaID])
             }
@@ -689,6 +700,39 @@ extension MediaCollectionViewController: ViewerControllerDataSource {
         let media = try! viewContext.existingObject(with: mediaID) as! Media
         
         return media
+    }
+    
+}
+
+
+// MARK: MediaViewer
+
+extension MediaCollectionViewController: PreviewControllerDataSource {
+    
+    func numberOfPreviewItems(in controller: MediaViewer.PreviewController) -> Int {
+        return frc.fetchedObjects?.count ?? 0
+    }
+    
+    func previewController(_ controller: MediaViewer.PreviewController, previewItemAt index: Int) -> any MediaViewer.PreviewItem {
+        let indexPath = IndexPath(item: index, section: 0)
+        let mediaID = self.diffableDataSource.itemIdentifier(for: indexPath)!
+        let media = try! viewContext.existingObject(with: mediaID) as! Media
+        
+        return media
+    }
+    
+}
+
+extension MediaCollectionViewController: PreviewControllerDelegate {
+    
+    func previewController(_ controller: MediaViewer.PreviewController, transitionViewFor item: any MediaViewer.PreviewItem) -> UIView? {
+        guard let media = item as? Media,
+              let thumbnail = media.thumbnail,
+              let data = try? Data(contentsOf: thumbnail.url),
+              let image = UIImage(data: data)
+        else { return nil }
+        
+        return UIImageView(image: image)
     }
     
 }
